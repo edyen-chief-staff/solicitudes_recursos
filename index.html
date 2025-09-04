@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Solicitudes STAFF — Registro y Formulario</title>
+<style>
+  :root { --gap: 10px; --pad: 14px; --radius: 8px; --border:#d9d9d9; }
+  * { box-sizing: border-box; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; }
+  body { margin: 0; padding: 20px; background:#fafafa; color:#222; }
+  h1,h2 { margin: 0 0 10px; }
+  .wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .card { background: #fff; border: 1px solid var(--border); border-radius: var(--radius); padding: var(--pad); }
+  .row { display:grid; grid-template-columns: 1fr 1fr; gap: var(--gap); }
+  .row-3 { display:grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--gap); }
+  label { display:block; font-size: 12px; color:#555; margin-bottom: 6px; }
+  input[type="text"], input[type="number"], input[type="date"], select, textarea {
+    width: 100%; padding: 10px; border:1px solid var(--border); border-radius:6px; background:#fff;
+  }
+  textarea { min-height: 70px; resize: vertical; }
+  .radio-group, .check-group { display:flex; gap: 10px; flex-wrap: wrap; }
+  .pill { border:1px solid var(--border); padding:8px 10px; border-radius: 999px; display:flex; align-items:center; gap:6px; }
+  .muted { color:#666; font-size:12px; }
+  .btn { border:1px solid #ccc; background:#111; color:#fff; padding:10px 14px; border-radius:8px; cursor:pointer; }
+  .btn.secondary { background:#f5f5f5; color:#111; }
+  .btn.inline { padding:6px 10px; font-size:12px; }
+  .btn:disabled { opacity:.5; cursor: not-allowed; }
+  .actions { display:flex; gap:10px; flex-wrap: wrap; }
+  .grid { width:100%; border-collapse: collapse; }
+  .grid th, .grid td { border-bottom:1px solid #eee; text-align:left; padding:8px; font-size: 13px; }
+  .grid th { font-weight: 600; color:#444; }
+  .tag { font-size:11px; background:#eef2ff; color:#1f3ccf; padding:2px 6px; border-radius:999px; }
+  canvas { border:1px dashed #bbb; border-radius:6px; width:100%; height:160px; }
+  .template { border:1px solid #ddd; padding:12px; border-radius:8px; background:#fff; }
+  .template h3 { margin: 0 0 6px; }
+  .template .line { display:flex; gap:8px; align-items:center; }
+  .template .box { border:1px solid #333; width:16px; height:16px; display:inline-block; text-align:center; line-height:16px; font-weight:700; }
+  .right { text-align:right; }
+  .flex { display:flex; align-items:center; gap:10px; }
+  .hide { display:none; }
+  @media (max-width: 1024px) { .wrap { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+  <h1>Solicitudes STAFF</h1>
+  <p class="muted">Folio consecutivo inicia en <strong>STAFF 41</strong>. El registro queda guardado en este equipo (localStorage). Usa <em>Exportar/Respaldo</em> para moverlo a otra computadora.</p>
+
+  <div class="wrap">
+    <!-- Formulario -->
+    <div class="card">
+      <h2>Nueva solicitud</h2>
+      <div class="row">
+        <div>
+          <label>Folio</label>
+          <input id="folio" type="text" readonly />
+        </div>
+        <div>
+          <label>Centro de costos</label>
+          <input id="centroCostos" type="text" value="Chief of Staff" readonly />
+        </div>
+      </div>
+
+      <label style="margin-top:10px;">Tipo de solicitud</label>
+      <div class="radio-group">
+        <label class="pill"><input type="radio" name="tipo" value="pago" checked /> Pago a proveedor</label>
+        <label class="pill"><input type="radio" name="tipo" value="anticipo" /> Anticipo</label>
+        <label class="pill"><input type="radio" name="tipo" value="gastos" /> Gastos a comprobar</label>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <label>Compañía</label>
+          <select id="compania">
+            <option value="">Selecciona...</option>
+            <option>UPA</option>
+            <option>EDYEN Digital</option>
+            <option>EDYEN (general)</option>
+            <option>Compra Rentando</option>
+            <option>EDYEN Capital</option>
+          </select>
+        </div>
+        <div>
+          <label>Condición de pago</label>
+          <select id="condicion">
+            <option value="contado">De contado</option>
+            <option value="parcialidades">Parcialidades</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Fecha máxima de pago</label>
+          <input id="fechaMax" type="date" />
+          <div class="flex">
+            <input id="inmediato" type="checkbox" />
+            <label for="inmediato">Inmediato</label>
+          </div>
+        </div>
+        <div id="parcialidadesBox">
+          <label>Número de parcialidades</label>
+          <input id="parcialidades" type="number" min="2" step="1" placeholder="2, 3, 6..." />
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <div>
+          <label>Proveedor (Nombre)</label>
+          <input id="proveedor" type="text" />
+        </div>
+        <div>
+          <label>RFC del Proveedor</label>
+          <input id="rfc" type="text" placeholder="ABC123456T12" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Banco</label>
+          <input id="banco" type="text" />
+        </div>
+        <div>
+          <label>CLABE (18 dígitos)</label>
+          <input id="clabe" type="text" maxlength="18" />
+        </div>
+      </div>
+
+      <label style="margin-top:10px;">Descripción del evento / tipo de gasto</label>
+      <textarea id="descripcion" placeholder="Describe el gasto, servicio o evento..."></textarea>
+
+      <div class="row">
+        <div>
+          <label>Monto de la factura (MXN)</label>
+          <input id="monto" type="number" step="0.01" min="0" placeholder="0.00" />
+        </div>
+        <div>
+          <label>Monto en letra</label>
+          <input id="montoLetra" type="text" readonly />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Firmado por</label>
+          <input id="firmante" type="text" value="Eric Barrera Zamora" />
+        </div>
+        <div>
+          <label>Firma (trazo opcional)</label>
+          <button class="btn inline secondary" id="limpiarFirma" type="button">Limpiar firma</button>
+        </div>
+      </div>
+      <canvas id="canvasFirma"></canvas>
+
+      <div class="actions" style="margin-top:10px;">
+        <button id="btnGuardar" class="btn">Guardar solicitud</button>
+        <button id="btnVista" class="btn secondary" type="button">Ver formato</button>
+        <button id="btnImprimir" class="btn secondary" type="button">Imprimir formato</button>
+      </div>
+      <p class="muted">Al guardar: se registra la solicitud, se incrementa el folio y queda lista para exportar/imprimir.</p>
+    </div>
+
+    <!-- Registro -->
+    <div class="card">
+      <div class="flex" style="justify-content:space-between;">
+        <h2>Registro de solicitudes</h2>
+        <div class="actions">
+          <button id="btnExportCSV" class="btn secondary">Exportar CSV</button>
+          <button id="btnBackup" class="btn secondary">Respaldo JSON</button>
+          <label class="btn secondary" style="cursor:pointer;">
+            Importar JSON
+            <input id="importJSON" type="file" accept=".json" style="display:none;">
+          </label>
+        </div>
+      </div>
+      <div class="row">
+        <div>
+          <label>Buscar</label>
+          <input id="buscar" type="text" placeholder="Proveedor, folio, compañía, RFC..." />
+        </div>
+        <div>
+          <label>Folio inicial (ajustar si lo necesitas)</label>
+          <div class="flex">
+            <input id="baseFolio" type="number" min="1" />
+            <button id="btnSetBase" class="btn inline secondary" type="button">Aplicar</button>
+          </div>
+          <small class="muted">Formato del folio: “STAFF N”.</small>
+        </div>
+      </div>
+
+      <div style="overflow:auto; max-height: 420px; border:1px solid #eee; border-radius:8px; margin-top:10px;">
+        <table class="grid" id="tabla">
+          <thead>
+            <tr>
+              <th>Folio</th>
+              <th>Fecha</th>
+              <th>Tipo</th>
+              <th>Compañía</th>
+              <th>Proveedor</th>
+              <th>RFC</th>
+              <th>Monto</th>
+              <th class="right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Vista previa de Formato (plantilla simple; luego mapeamos a la tuya) -->
+  <div class="card" style="margin-top:20px;">
+    <h2>Formato (vista previa)</h2>
+    <div id="plantilla" class="template">
+      <h3 id="tpl_folio">Folio: —</h3>
+      <div class="line"><strong>Compañía:</strong> <span id="tpl_compania"></span></div>
+      <div class="line"><strong>Centro de costos:</strong> <span id="tpl_cc"></span></div>
+      <div class="line"><strong>Tipo de solicitud:</strong>
+        <span class="pill"><span class="box" id="x_pago">&nbsp;</span> Pago a proveedor</span>
+        <span class="pill"><span class="box" id="x_anticipo">&nbsp;</span> Anticipo</span>
+        <span class="pill"><span class="box" id="x_gastos">&nbsp;</span> Gastos a comprobar</span>
+      </div>
+      <div class="row">
+        <div><strong>Proveedor:</strong> <span id="tpl_prov"></span></div>
+        <div><strong>RFC:</strong> <span id="tpl_rfc"></span></div>
+      </div>
+      <div class="row">
+        <div><strong>Banco:</strong> <span id="tpl_banco"></span></div>
+        <div><strong>CLABE:</strong> <span id="tpl_clabe"></span></div>
+      </div>
+      <div class="row">
+        <div><strong>Condición de pago:</strong> <span id="tpl_cond"></span></div>
+        <div><strong>Fecha máx. pago / Inmediato:</strong> <span id="tpl_fecha"></span></div>
+      </div>
+      <div style="margin-top:8px;"><strong>Descripción:</strong><br/><span id="tpl_desc"></span></div>
+      <div class="row" style="margin-top:8px;">
+        <div><strong>Monto:</strong> <span id="tpl_monto"></span></div>
+        <div><strong>En letra:</strong> <span id="tpl_letra"></span></div>
+      </div>
+      <div class="row" style="margin-top:14px;">
+        <div>
+          <strong>Firmado por:</strong> <span id="tpl_firmante"></span><br/>
+          <small class="muted">“Firmado por un servidor”.</small>
+        </div>
+        <div style="text-align:center;">
+          <strong>Firma</strong><br/>
+          <img id="tpl_firma" alt="Firma" style="max-height:90px; max-width:250px;" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ================== Utilidades ================== */
+const LS_KEY = 'staff_solicitudes_registro_v1';
+const LS_FOLIO_BASE = 'staff_solicitudes_folio_base_v1';
+const LS_FOLIO_NEXT = 'staff_solicitudes_folio_next_v1';
+
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+function hoyISO(){ const d = new Date(); return d.toISOString().slice(0,10); }
+function fmtMoney(n){ return new Intl.NumberFormat('es-MX',{style:'currency', currency:'MXN', minimumFractionDigits:2}).format(n||0); }
+
+/* RFC México (simplificado, válido para PF/PM) */
+function validaRFC(rfc){
+  rfc = (rfc||'').toUpperCase().trim();
+  const re = /^([A-ZÑ&]{3,4})(\d{2})(\d{2})(\d{2})([A-Z\d]{2})([A\d])$/;
+  return re.test(rfc);
+}
+
+/* CLABE 18 dígitos */
+function validaCLABE(clabe){
+  return /^\d{18}$/.test((clabe||'').trim());
+}
+
+/* Número a letras en español (MXN) — soporta hasta billones */
+function numeroALetrasMXN(num){
+  num = Number(num||0).toFixed(2);
+  const [ent, dec] = num.split('.');
+  const entero = parseInt(ent,10);
+  const centavos = dec.padStart(2,'0');
+
+  if (isNaN(entero)) return '';
+
+  const UNIDADES = ['','uno','dos','tres','cuatro','cinco','seis','siete','ocho','nueve','diez','once','doce','trece','catorce','quince','dieciséis','diecisiete','dieciocho','diecinueve'];
+  const DECENAS = ['','diez','veinte','treinta','cuarenta','cincuenta','sesenta','setenta','ochenta','noventa'];
+  const CENTENAS = ['','ciento','doscientos','trescientos','cuatrocientos','quinientos','seiscientos','setecientos','ochocientos','novecientos'];
+
+  function centenasToTexto(n){
+    if(n===0) return '';
+    if(n===100) return 'cien';
+    const c = Math.floor(n/100), d = Math.floor((n%100)/10), u = n%10, dd = n%100;
+    const ctxt = CENTENAS[c];
+    if(dd===0) return ctxt;
+    if(dd<20) return (ctxt?ctxt+' ':'') + UNIDADES[dd];
+    let dtxt = DECENAS[d];
+    if(d===2 && u>0) dtxt = 'veinti' + UNIDADES[u]; else if(u>0) dtxt = dtxt + ' y ' + UNIDADES[u];
+    return (ctxt?ctxt+' ':'') + dtxt;
+  }
+
+  function grupo(n, nombreSing, nombrePlu){
+    if(n===0) return '';
+    if(n===1) return nombreSing;
+    return nombrePlu;
+  }
+
+  function secciones(n){
+    if(n===0) return 'cero';
+    let texto = '';
+
+    const billones = Math.floor(n/1_000_000_000_000);
+    n = n % 1_000_000_000_000;
+    const milesMillones = Math.floor(n/1_000_000_000);
+    n = n % 1_000_000_000;
+    const millones = Math.floor(n/1_000_000);
+    n = n % 1_000_000;
+    const miles = Math.floor(n/1000);
+    const cientos = n % 1000;
+
+    if(billones>0){
+      texto += (billones===1? 'un billón' : numeroSimple(billones)+' billones');
+    }
+    if(milesMillones>0){
+      texto += (texto?' ':'') + (milesMillones===1? 'mil millones' : numeroSimple(milesMillones)+' mil millones');
+    }
+    if(millones>0){
+      texto += (texto?' ':'') + (millones===1? 'un millón' : numeroSimple(millones)+' millones');
+    }
+    if(miles>0){
+      texto += (texto?' ':'') + (miles===1? 'mil' : numeroSimple(miles)+' mil');
+    }
+    if(cientos>0){
+      texto += (texto?' ':'') + numeroSimple(cientos);
+    }
+    return texto;
+  }
+
+  function numeroSimple(n){ // 1..999
+    return centenasToTexto(n);
+  }
+
+  let texto = secciones(entero).trim();
+  // Ajuste UNO -> UN para pesos
+  texto = texto.replace(/\buno\b/g,'un');
+
+  const pesos = (entero===1) ? 'peso' : 'pesos';
+  return (texto? (texto.charAt(0).toUpperCase()+texto.slice(1)) : 'Cero') + ` ${pesos} ${centavos}/100 M.N.`;
+}
+
+/* ================== Estado & Persistencia ================== */
+function getRegistro(){
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]'); } catch(e){ return []; }
+}
+function setRegistro(arr){
+  localStorage.setItem(LS_KEY, JSON.stringify(arr||[]));
+  renderTabla();
+}
+function getBaseFolio(){
+  const v = Number(localStorage.getItem(LS_FOLIO_BASE));
+  return Number.isFinite(v) && v>0 ? v : 41; // inicia en 41
+}
+function setBaseFolio(n){
+  localStorage.setItem(LS_FOLIO_BASE, String(n));
+  // Si el siguiente es menor al base, lo ajustamos:
+  const next = getNextFolioNumber();
+  if(next < n){ setNextFolioNumber(n); }
+  renderFolio();
+}
+function getNextFolioNumber(){
+  const v = Number(localStorage.getItem(LS_FOLIO_NEXT));
+  return Number.isFinite(v) && v>0 ? v : getBaseFolio();
+}
+function setNextFolioNumber(n){
+  localStorage.setItem(LS_FOLIO_NEXT, String(n));
+  renderFolio();
+}
+
+function siguienteFolio(){
+  const n = getNextFolioNumber();
+  setNextFolioNumber(n+1);
+  return `STAFF ${n}`;
+}
+function peekFolio(){
+  const n = getNextFolioNumber();
+  return `STAFF ${n}`;
+}
+
+/* ================== Firma en Canvas ================== */
+let drawing = false, ctx, canvas, hasStroke = false;
+function firmaInit(){
+  canvas = $('#canvasFirma');
+  function fixSize(){ const dpr = window.devicePixelRatio || 1; canvas.width = canvas.clientWidth * dpr; canvas.height = canvas.clientHeight * dpr; ctx = canvas.getContext('2d'); ctx.scale(dpr,dpr); ctx.lineWidth=2; ctx.lineCap='round'; }
+  fixSize(); window.addEventListener('resize', fixSize);
+  canvas.addEventListener('mousedown', e=>{drawing=true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY);});
+  canvas.addEventListener('mousemove', e=>{ if(!drawing) return; ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); hasStroke = true;});
+  document.addEventListener('mouseup', ()=> drawing=false);
+  $('#limpiarFirma').addEventListener('click', ()=>{ ctx.clearRect(0,0,canvas.width,canvas.height); hasStroke=false; });
+}
+function obtenerImagenFirma(){
+  if(!hasStroke) return '';
+  return canvas.toDataURL('image/png');
+}
+
+/* ================== UI & Lógica ================== */
+function renderFolio(){ $('#folio').value = peekFolio(); $('#baseFolio').value = getBaseFolio(); }
+function renderTabla(){
+  const q = ($('#buscar').value || '').toLowerCase();
+  const tbody = $('#tbody'); tbody.innerHTML = '';
+  const rows = getRegistro();
+  rows.forEach((r, idx)=>{
+    const text = (r.folio+' '+r.tipo+' '+r.compania+' '+r.proveedor+' '+r.rfc).toLowerCase();
+    if(q && !text.includes(q)) return;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${r.folio}</td>
+      <td>${r.fecha}</td>
+      <td><span class="tag">${tipoLabel(r.tipo)}</span></td>
+      <td>${r.compania}</td>
+      <td>${r.proveedor}</td>
+      <td>${r.rfc}</td>
+      <td>${fmtMoney(r.monto)}</td>
+      <td class="right">
+        <button class="btn inline secondary" data-edit="${idx}">Editar</button>
+        <button class="btn inline secondary" data-del="${idx}">Borrar</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+
+  // Actions
+  tbody.querySelectorAll('button[data-del]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const i = Number(b.getAttribute('data-del'));
+      const reg = getRegistro(); reg.splice(i,1); setRegistro(reg);
+    });
+  });
+  tbody.querySelectorAll('button[data-edit]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const i = Number(b.getAttribute('data-edit'));
+      const r = getRegistro()[i];
+      cargarEnFormulario(r, i);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  });
+}
+
+function tipoLabel(t){
+  if(t==='pago') return 'Pago a proveedor';
+  if(t==='anticipo') return 'Anticipo';
+  return 'Gastos a comprobar';
+}
+
+function leerFormulario(){
+  const tipo = ($$('input[name="tipo"]:checked')[0]||{}).value || 'pago';
+  const data = {
+    folio: $('#folio').value.trim(),
+    fecha: hoyISO(),
+    tipo,
+    compania: $('#compania').value.trim(),
+    condicion: $('#condicion').value,
+    fechaMax: $('#inmediato').checked ? 'Inmediato' : ($('#fechaMax').value || ''),
+    parcialidades: $('#condicion').value==='parcialidades' ? Number($('#parcialidades').value||0) : 0,
+    proveedor: $('#proveedor').value.trim(),
+    rfc: $('#rfc').value.trim().toUpperCase(),
+    banco: $('#banco').value.trim(),
+    clabe: $('#clabe').value.trim(),
+    centroCostos: $('#centroCostos').value.trim(),
+    descripcion: $('#descripcion').value.trim(),
+    monto: Number($('#monto').value||0),
+    montoLetra: $('#montoLetra').value.trim(),
+    firmante: $('#firmante').value.trim(),
+    firmaImg: obtenerImagenFirma(), // base64
+    _idx: null // para edición
+  };
+  return data;
+}
+
+function validar(data){
+  const errs = [];
+  if(!data.compania) errs.push('Selecciona la compañía.');
+  if(!data.proveedor) errs.push('Captura el nombre del proveedor.');
+  if(!validaRFC(data.rfc)) errs.push('RFC inválido.');
+  if(!validaCLABE(data.clabe)) errs.push('CLABE debe tener 18 dígitos.');
+  if(!data.banco) errs.push('Captura el banco.');
+  if(!(data.monto>0)) errs.push('Monto debe ser mayor a 0.');
+  if(data.condicion==='parcialidades' && data.parcialidades<2) errs.push('Indica número de parcialidades (mínimo 2).');
+  if(!data.fechaMax) errs.push('Indica fecha máxima de pago o marca “Inmediato”.');
+  return errs;
+}
+
+function limpiarFormulario(keepFolio=true){
+  if(!keepFolio) renderFolio();
+  $('#compania').value = '';
+  $('#condicion').value = 'contado';
+  $('#parcialidades').value = '';
+  $('#parcialidadesBox').style.opacity = .4;
+  $('#parcialidades').disabled = true;
+  $('#fechaMax').value = '';
+  $('#inmediato').checked = false;
+  $('#proveedor').value = '';
+  $('#rfc').value = '';
+  $('#banco').value = '';
+  $('#clabe').value = '';
+  $('#descripcion').value = '';
+  $('#monto').value = '';
+  $('#montoLetra').value = '';
+  $('#firmante').value = 'Eric Barrera Zamora';
+  const ctx = $('#canvasFirma').getContext('2d');
+  ctx.clearRect(0,0,$('#canvasFirma').width,$('#canvasFirma').height);
+  hasStroke = false;
+  $$('input[name="tipo"]')[0].checked = true;
+  actualizarVista();
+}
+
+function cargarEnFormulario(r, idx){
+  setNextFolioNumber( Number((r.folio||'').replace(/^\s*STAFF\s+/i,'').trim()) ); // para mostrar ese folio si quieres re-guardar
+  renderFolio();
+  ($$(`input[name="tipo"]`).find(x=>x.value===r.tipo)||$$('input[name="tipo"]')[0]).checked = true;
+  $('#compania').value = r.compania;
+  $('#condicion').value = r.condicion;
+  if(r.condicion==='parcialidades'){
+    $('#parcialidadesBox').style.opacity = 1;
+    $('#parcialidades').disabled = false;
+    $('#parcialidades').value = r.parcialidades || 2;
+  } else {
+    $('#parcialidadesBox').style.opacity = .4;
+    $('#parcialidades').disabled = true;
+    $('#parcialidades').value = '';
+  }
+  if(r.fechaMax==='Inmediato'){ $('#inmediato').checked = true; $('#fechaMax').value=''; }
+  else { $('#inmediato').checked = false; $('#fechaMax').value = r.fechaMax || ''; }
+  $('#proveedor').value = r.proveedor;
+  $('#rfc').value = r.rfc;
+  $('#banco').value = r.banco;
+  $('#clabe').value = r.clabe;
+  $('#descripcion').value = r.descripcion;
+  $('#monto').value = r.monto.toFixed(2);
+  $('#montoLetra').value = r.montoLetra;
+  $('#firmante').value = r.firmante || 'Eric Barrera Zamora';
+  // Cargar firma (como no tenemos el canvas reverse, solo vista previa):
+  if(r.firmaImg){ hasStroke = true; const img = new Image(); img.onload=()=>{ const c=$('#canvasFirma'); const ctx=c.getContext('2d'); ctx.clearRect(0,0,c.width,c.height); ctx.drawImage(img,10,10,250,90); }; img.src=r.firmaImg; }
+  // Guardamos índice para re-escritura:
+  $('#btnGuardar').setAttribute('data-editing', idx);
+  actualizarVista();
+}
+
+function actualizarVista(){
+  const tipo = ($$('input[name="tipo"]:checked')[0]||{}).value || 'pago';
+  $('#x_pago').textContent = tipo==='pago' ? 'X' : '\u00A0';
+  $('#x_anticipo').textContent = tipo==='anticipo' ? 'X' : '\u00A0';
+  $('#x_gastos').textContent = tipo==='gastos' ? 'X' : '\u00A0';
+  $('#tpl_folio').textContent = 'Folio: ' + $('#folio').value;
+  $('#tpl_compania').textContent = $('#compania').value || '—';
+  $('#tpl_cc').textContent = $('#centroCostos').value || '—';
+  $('#tpl_prov').textContent = $('#proveedor').value || '—';
+  $('#tpl_rfc').textContent = $('#rfc').value || '—';
+  $('#tpl_banco').textContent = $('#banco').value || '—';
+  $('#tpl_clabe').textContent = $('#clabe').value || '—';
+
+  let condTxt = ($('#condicion').value==='contado') ? 'De contado' : `Parcialidades (${ $('#parcialidades').value || '—' })`;
+  $('#tpl_cond').textContent = condTxt;
+
+  $('#tpl_fecha').textContent = $('#inmediato').checked ? 'Inmediato' : ($('#fechaMax').value || '—');
+  $('#tpl_desc').textContent = $('#descripcion').value || '—';
+  const m = Number($('#monto').value||0);
+  $('#tpl_monto').textContent = fmtMoney(m);
+  $('#tpl_letra').textContent = $('#montoLetra').value || '—';
+  $('#tpl_firmante').textContent = $('#firmante').value || '—';
+  const firmaB64 = obtenerImagenFirma();
+  $('#tpl_firma').src = firmaB64 || '';
+}
+
+function exportCSV(){
+  const rows = getRegistro();
+  const headers = ['Folio','Fecha','Tipo','Compañía','Condición','FechaMax/Inmediato','Parcialidades','Proveedor','RFC','Banco','CLABE','CentroCostos','Descripción','Monto','MontoLetra','Firmante'];
+  const csv = [headers.join(',')].concat(rows.map(r=>{
+    const vals = [r.folio,r.fecha,tipoLabel(r.tipo),r.compania,r.condicion,r.fechaMax,r.parcialidades,r.proveedor,r.rfc,r.banco,r.clabe,r.centroCostos,(r.descripcion||'').replace(/\n/g,' ').replace(/,/g,';'),r.monto,r.montoLetra,r.firmante];
+    return vals.map(v=> `"${String(v??'').replace(/"/g,'""')}"`).join(',');
+  })).join('\n');
+  downloadText(csv, 'solicitudes_staff.csv', 'text/csv');
+}
+function backupJSON(){
+  const data = { baseFolio:getBaseFolio(), nextFolio:getNextFolioNumber(), registro:getRegistro() };
+  downloadText(JSON.stringify(data,null,2), 'solicitudes_staff_backup.json', 'application/json');
+}
+function downloadText(text, filename, mime){
+  const blob = new Blob([text], {type: mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a'); a.href=url; a.download=filename; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importarJSON(file){
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const data = JSON.parse(reader.result);
+      if(data.baseFolio) setBaseFolio(Number(data.baseFolio));
+      if(data.nextFolio) setNextFolioNumber(Number(data.nextFolio));
+      if(Array.isArray(data.registro)) setRegistro(data.registro);
+      alert('Importación completa.');
+    }catch(e){ alert('Archivo inválido.'); }
+  };
+  reader.readAsText(file);
+}
+
+/* ================== Eventos ================== */
+window.addEventListener('DOMContentLoaded', ()=>{
+  // Inicializar folio base si no existe
+  if(!localStorage.getItem(LS_FOLIO_BASE)) setBaseFolio(41);
+  renderFolio();
+  renderTabla();
+  firmaInit();
+
+  // Interacciones
+  $('#condicion').addEventListener('change', ()=>{
+    const isPar = $('#condicion').value==='parcialidades';
+    $('#parcialidadesBox').style.opacity = isPar?1:.4;
+    $('#parcialidades').disabled = !isPar;
+    actualizarVista();
+  });
+  $('#inmediato').addEventListener('change', ()=>{
+    if($('#inmediato').checked) $('#fechaMax').value='';
+    actualizarVista();
+  });
+  ['compania','fechaMax','parcialidades','proveedor','rfc','banco','clabe','descripcion','monto','firmante'].forEach(id=>{
+    $('#'+id).addEventListener('input', ()=>{
+      if(id==='monto'){
+        const n = Number($('#monto').value||0);
+        $('#montoLetra').value = numeroALetrasMXN(n);
+      }
+      actualizarVista();
+    });
+  });
+  $$('input[name="tipo"]').forEach(r=> r.addEventListener('change', actualizarVista));
+
+  $('#btnGuardar').addEventListener('click', ()=>{
+    const editIdxAttr = $('#btnGuardar').getAttribute('data-editing');
+    const editIdx = editIdxAttr!==null ? Number(editIdxAttr) : null;
+    const data = leerFormulario();
+    const errs = validar(data);
+    if(errs.length){ alert('Corrige:\n• ' + errs.join('\n• ')); return; }
+
+    if(editIdx!==null){
+      // Reemplazar registro
+      const reg = getRegistro();
+      reg[editIdx] = data;
+      setRegistro(reg);
+      $('#btnGuardar').removeAttribute('data-editing');
+      alert('Solicitud actualizada.');
+    } else {
+      // Nuevo: asegurar folio actual y luego incrementar
+      data.folio = peekFolio();
+      const reg = getRegistro(); reg.unshift(data); setRegistro(reg);
+      siguienteFolio(); // incrementa para la próxima
+      alert('Solicitud guardada.');
+    }
+    limpiarFormulario(true);
+    actualizarVista();
+  });
+
+  $('#btnVista').addEventListener('click', actualizarVista);
+  $('#btnImprimir').addEventListener('click', ()=>{ actualizarVista(); window.print(); });
+
+  $('#btnExportCSV').addEventListener('click', exportCSV);
+  $('#btnBackup').addEventListener('click', backupJSON);
+  $('#importJSON').addEventListener('change', e=>{
+    const f = e.target.files[0]; if(f) importarJSON(f);
+    e.target.value = '';
+  });
+  $('#buscar').addEventListener('input', renderTabla);
+
+  $('#btnSetBase').addEventListener('click', ()=>{
+    const n = Number($('#baseFolio').value||41);
+    if(n<1 || !Number.isFinite(n)) return alert('Valor inválido.');
+    setBaseFolio(n);
+    alert('Folio base actualizado.');
+  });
+
+  // Vista inicial
+  $('#montoLetra').value = '';
+  actualizarVista();
+});
+</script>
+</body>
+</html>
